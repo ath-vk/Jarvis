@@ -2,8 +2,11 @@ package com.project.jarvis.controller;
 
 import com.project.jarvis.dto.member.InviteMemberRequest;
 import com.project.jarvis.dto.member.MemberResponse;
+import com.project.jarvis.dto.member.UpdateMemberRoleRequest;
 import com.project.jarvis.service.ProjectMemberService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +16,10 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/projects/{projectId}/members")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProjectMemberController {
 
-    private final ProjectMemberService projectMemberService;
+    ProjectMemberService projectMemberService;
 
     //TODO: Check MemberResponse or ProjectMember
     @GetMapping
@@ -39,14 +43,14 @@ public class ProjectMemberController {
     public ResponseEntity<MemberResponse>  updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody InviteMemberRequest request
+            @RequestBody UpdateMemberRoleRequest request
     ) {
         Long userId = 1L;
         return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request, userId));
     }
 
-    @PatchMapping("/{memberId}")
-    public ResponseEntity<MemberResponse>  updateMemberRole(
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<MemberResponse>  deleteMember(
             @PathVariable Long projectId,
             @PathVariable Long memberId
     ) {

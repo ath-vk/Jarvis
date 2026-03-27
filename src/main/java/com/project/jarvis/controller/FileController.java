@@ -4,7 +4,9 @@ import com.project.jarvis.dto.project.FileContentResponse;
 import com.project.jarvis.dto.project.FileNode;
 import com.project.jarvis.dto.project.FileTreeResponse;
 import com.project.jarvis.service.FileService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,9 +18,10 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/projects/{projectid}/files")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileController {
 
-    private final FileService fileService;
+    FileService fileService;
 
     @GetMapping
     public ResponseEntity<List<FileNode>> getFileTree(@PathVariable long projectId) {
