@@ -12,6 +12,7 @@ import com.project.jarvis.repository.ProjectMemberRepository;
 import com.project.jarvis.repository.ProjectRepository;
 import com.project.jarvis.repository.UserRepository;
 import com.project.jarvis.service.ProjectMemberService;
+import com.project.jarvis.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,11 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     ProjectRepository projectRepository;
     ProjectMemberMapper projectMemberMapper;
     UserRepository userRepository;
+    ProjectService projectService;
 
     @Override
     public List<MemberResponse> getProjectMembers(Long projectId, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(projectId, userId).orElseThrow();
+        Project project = projectService.getAccessibleProjectById(projectId, userId);
 
         List<MemberResponse> memberResponseList = new ArrayList<>();
         memberResponseList.add(projectMemberMapper.toProjectMemberResponseFromOwner(project.getOwner()));
@@ -47,7 +49,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     @Override
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(projectId, userId).orElseThrow();
+        Project project = projectService.getAccessibleProjectById(projectId, userId);
 
         if(!project.getOwner().getId().equals(userId)){
             throw new RuntimeException("Not allowed");
@@ -80,7 +82,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     @Override
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(projectId, userId).orElseThrow();
+        Project project = projectService.getAccessibleProjectById(projectId, userId);
 
         if(!project.getOwner().getId().equals(userId)){
             throw new RuntimeException("Not allowed");
@@ -98,7 +100,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     @Override
     public void removeProjectMember(Long projectId, Long memberId, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(projectId, userId).orElseThrow();
+        Project project = projectService.getAccessibleProjectById(projectId, userId);
 
         if(!project.getOwner().getId().equals(userId)){
             throw new RuntimeException("Member not found in project");

@@ -4,6 +4,7 @@ import com.project.jarvis.dto.member.InviteMemberRequest;
 import com.project.jarvis.dto.member.MemberResponse;
 import com.project.jarvis.dto.member.UpdateMemberRoleRequest;
 import com.project.jarvis.service.ProjectMemberService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,7 +32,7 @@ public class ProjectMemberController {
     @PostMapping
     public ResponseEntity<MemberResponse> inviteMember(
             @PathVariable Long projectId,
-            @RequestBody InviteMemberRequest request
+            @RequestBody @Valid InviteMemberRequest request
     ) {
         Long userId = 1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -43,7 +44,7 @@ public class ProjectMemberController {
     public ResponseEntity<MemberResponse>  updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody UpdateMemberRoleRequest request
+            @RequestBody @Valid UpdateMemberRoleRequest request
     ) {
         Long userId = 1L;
         return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request, userId));

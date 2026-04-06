@@ -5,6 +5,7 @@ import com.project.jarvis.dto.project.ProjectResponse;
 import com.project.jarvis.dto.project.ProjectSummaryResponse;
 import com.project.jarvis.entity.Project;
 import com.project.jarvis.entity.User;
+import com.project.jarvis.error.ResourceNotFoundException;
 import com.project.jarvis.mapper.ProjectMapper;
 import com.project.jarvis.repository.ProjectRepository;
 import com.project.jarvis.repository.UserRepository;
@@ -14,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.time.Instant;
 import java.util.List;
@@ -48,13 +50,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getUserProjectById(Long id, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(id, userId).orElseThrow();
+        Project project = getAccessibleProjectById(id, userId);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(id, userId).orElseThrow();
+        Project project = getAccessibleProjectById(id, userId);
         project.setName(request.name());
         projectRepository.save(project);
         return projectMapper.toProjectResponse(project);
@@ -62,11 +64,18 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void softDelete(Long id, Long userId) {
-        Project project = projectRepository.findAccessibleProjectsById(id, userId).orElseThrow();
+        Project project = getAccessibleProjectById(id, userId);
         if(!project.getOwner().getId().equals(userId)) {
             throw new RuntimeException("You are not allowed to this project");
         }
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
+    }
+
+    @Override
+    public Project getAccessibleProjectById(Long id, Long userId) {
+        return projectRepository.
+                findAccessibleProjectsById(id, userId).
+                orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
     }
 }
