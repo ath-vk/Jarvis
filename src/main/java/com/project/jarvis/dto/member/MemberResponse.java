@@ -4,7 +4,7 @@ import com.project.jarvis.enums.ProjectRole;
 
 public record MemberResponse(
         Long userId,
-        String email,
+        String username,
         String name,
         ProjectRole projectRole
 ) {

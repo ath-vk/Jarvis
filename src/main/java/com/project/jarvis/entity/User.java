@@ -21,11 +21,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    String email;
+    String username;
     String name;
-    String passwordHash;
-
-    String avatarUrl;
+    String password;
 
     @CreationTimestamp
     Instant createdAt;

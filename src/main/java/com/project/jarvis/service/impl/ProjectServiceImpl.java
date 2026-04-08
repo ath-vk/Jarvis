@@ -4,9 +4,13 @@ import com.project.jarvis.dto.project.ProjectRequest;
 import com.project.jarvis.dto.project.ProjectResponse;
 import com.project.jarvis.dto.project.ProjectSummaryResponse;
 import com.project.jarvis.entity.Project;
+import com.project.jarvis.entity.ProjectMember;
+import com.project.jarvis.entity.ProjectMemberId;
 import com.project.jarvis.entity.User;
+import com.project.jarvis.enums.ProjectRole;
 import com.project.jarvis.error.ResourceNotFoundException;
 import com.project.jarvis.mapper.ProjectMapper;
+import com.project.jarvis.repository.ProjectMemberRepository;
 import com.project.jarvis.repository.ProjectRepository;
 import com.project.jarvis.repository.UserRepository;
 import com.project.jarvis.service.ProjectService;
@@ -29,16 +33,31 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectRepository projectRepository;
     UserRepository userRepository;
     ProjectMapper projectMapper;
+    ProjectMemberRepository projectMemberRepository;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request, Long userId) {
         // getting user details
-        User owner = userRepository.findById(userId).orElseThrow();
+        User owner = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User", userId.toString())
+        );
         System.out.println(owner);
         // creating project entity object
-        Project project = Project.builder().name(request.name()).isPublic(false).owner(owner).build();
+        Project project = Project.builder().name(request.name()).isPublic(false).build();
         // saving in db
         project = projectRepository.save(project);
+
+        ProjectMemberId projectMemberId =  new ProjectMemberId(project.getId(), owner.getId());
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(projectMemberId)
+                .projectRole(ProjectRole.OWNER)
+                .user(owner)
+                .acceptedAt(Instant.now())
+                .invitedAt(Instant.now())
+                .project(project)
+                .build();
+        projectMemberRepository.save(projectMember);
+
         // returning the response by converting to dto
         return projectMapper.toProjectResponse(project);
     }
@@ -58,16 +77,13 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
         Project project = getAccessibleProjectById(id, userId);
         project.setName(request.name());
-        projectRepository.save(project);
+        project = projectRepository.save(project);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public void softDelete(Long id, Long userId) {
         Project project = getAccessibleProjectById(id, userId);
-        if(!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to this project");
-        }
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
     }
