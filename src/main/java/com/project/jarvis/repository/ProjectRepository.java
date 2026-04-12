@@ -1,6 +1,7 @@
 package com.project.jarvis.repository;
 
 import com.project.jarvis.entity.Project;
+import com.project.jarvis.enums.ProjectRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,11 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("""
         SELECT p FROM Project p
         WHERE p.deletedAt IS NULL
+        AND EXISTS (
+            SELECT 1 FROM ProjectMember pm
+            where pm.id.userId = :userId
+            AND pm.id.projectId = p.id
+        )
         ORDER BY p.updatedAt DESC
     """)
     List<Project> findAllAccessibleByUser(@Param("userId") Long userId);
@@ -22,8 +28,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("""
             SELECT p FROM Project p
             WHERE p.deletedAt IS NULL
-            AND p.id = :projectId
+                AND p.id = :projectId
+                AND EXISTS (
+                    SELECT 1 FROM ProjectMember pm
+                    WHERE pm.id.userId = :userId
+                    AND pm.id.projectId = :projectId
+                )
             """)
     Optional<Project> findAccessibleProjectsById(@Param("projectId") Long projectId, @Param("userId") Long userId);
-
 }
