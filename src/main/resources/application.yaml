@@ -20,3 +20,11 @@ spring:
 
 jwt:
   secret-key: opkqfbasdfqtnhuhtnsdplkmboitnjknofoinglspodfr
+
+stripe:
+  api:
+    secret:
+  webhook:
+    secret:
+
+client.url: http://localhost:8080
